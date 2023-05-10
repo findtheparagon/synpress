@@ -180,6 +180,14 @@ Cypress.Commands.add('rejectMetamaskPermissionToSpend', () => {
   return cy.task('rejectMetamaskPermissionToSpend');
 });
 
+Cypress.Commands.add('rejectPermisionToApproveAll', () => {
+  return cy.task('rejectPermisionToApproveAll');
+});
+
+Cypress.Commands.add('confirmPermisionToApproveAll', () => {
+  return cy.task('confirmPermisionToApproveAll');
+});
+
 Cypress.Commands.add('acceptMetamaskAccess', options => {
   return cy.task('acceptMetamaskAccess', options);
 });
@@ -245,7 +253,29 @@ Cypress.Commands.add('getNetwork', () => {
   return cy.task('getNetwork');
 });
 
-// Etherscan commands
+// SNX commands
+
+Cypress.Commands.add(
+  'snxExchangerSettle',
+  (asset, walletAddress, privateKey) => {
+    return cy.task(
+      'snxExchangerSettle',
+      { asset, walletAddress, privateKey },
+      { timeout: 300000 },
+    );
+  },
+);
+
+Cypress.Commands.add('snxCheckWaitingPeriod', (asset, walletAddress) => {
+  return cy.task(
+    'snxCheckWaitingPeriod',
+    { asset, walletAddress },
+    { timeout: 200000 },
+  );
+});
+
+// etherscan commands
+
 Cypress.Commands.add('etherscanGetTransactionStatus', txid => {
   return cy.task('etherscanGetTransactionStatus', { txid }, { timeout: 30000 });
 });
@@ -254,7 +284,8 @@ Cypress.Commands.add('etherscanWaitForTxSuccess', txid => {
   return cy.task('etherscanWaitForTxSuccess', { txid }, { timeout: 120000 });
 });
 
-// Helper commands
+// helper commands
+
 Cypress.Commands.add('waitForResources', (resources = []) => {
   const globalTimeout = 30000;
   const resourceCheckInterval = 2000;

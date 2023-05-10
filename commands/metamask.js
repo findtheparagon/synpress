@@ -32,7 +32,7 @@ const {
 const {
   confirmationPageElements,
 } = require('../pages/metamask/confirmation-page');
-const { setNetwork, getNetwork } = require('../helpers');
+const { setNetwork } = require('../helpers');
 
 let extensionInitialUrl;
 let extensionId;
@@ -372,23 +372,6 @@ const metamask = {
     return true;
   },
   async changeNetwork(network) {
-    const currentNetwork = getNetwork();
-
-    if (
-      typeof network === 'string' &&
-      (currentNetwork.networkDisplayName === network.toLowerCase() ||
-        currentNetwork.networkName === network.toLowerCase())
-    )
-      return false;
-
-    if (
-      typeof network === 'object' &&
-      (currentNetwork.networkDisplayName ===
-        network.networkName.toLowerCase() ||
-        currentNetwork.networkName === network.networkName.toLowerCase())
-    )
-      return false;
-
     await switchToMetamaskIfNotActive();
     await playwright.waitAndClick(mainPageElements.networkSwitcher.button);
     if (typeof network === 'string') {
@@ -790,6 +773,32 @@ const metamask = {
     }
     await playwright.waitAndClick(
       notificationPageElements.allowToSpendButton,
+      notificationPage,
+      { waitForEvent: 'close' },
+    );
+    return true;
+  },
+  async confirmPermisionToApproveAll() {
+    const notificationPage = await playwright.switchToMetamaskNotification();
+    await playwright.waitAndClick(
+      notificationPageElements.allowToSpendButton,
+      notificationPage,
+    );
+    await playwright.waitAndClick(
+      notificationPageElements.approveWarningToSpendButton,
+      notificationPage,
+      { waitForEvent: 'close' },
+    );
+    return true;
+  },
+  async rejectPermisionToApproveAll() {
+    const notificationPage = await playwright.switchToMetamaskNotification();
+    await playwright.waitAndClick(
+      notificationPageElements.allowToSpendButton,
+      notificationPage,
+    );
+    await playwright.waitAndClick(
+      notificationPageElements.rejectWarningToSpendButton,
       notificationPage,
       { waitForEvent: 'close' },
     );

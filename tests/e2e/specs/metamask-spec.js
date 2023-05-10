@@ -5,7 +5,7 @@ describe('Metamask', () => {
     it(`setupMetamask should finish metamask setup using secret words`, () => {
       cy.setupMetamask(
         'test test test test test test test test test test test junk',
-        'sepolia',
+        'goerli',
         'Tester@1234',
       ).then(setupFinished => {
         expect(setupFinished).to.be.true;
@@ -27,8 +27,8 @@ describe('Metamask', () => {
       cy.acceptMetamaskAccess().then(connected => {
         expect(connected).to.be.true;
       });
-      cy.get('#network').contains('11155111');
-      cy.get('#chainId').contains('0xaa36a7');
+      cy.get('#network').contains('5');
+      cy.get('#chainId').contains('0x5');
       cy.get('#accounts').should(
         'have.text',
         '0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266',
@@ -43,8 +43,8 @@ describe('Metamask', () => {
     });
     it(`getNetwork should return network by default`, () => {
       cy.getNetwork().then(network => {
-        expect(network.networkName).to.be.equal('sepolia');
-        expect(network.networkId).to.be.equal(11155111);
+        expect(network.networkName).to.be.equal('goerli');
+        expect(network.networkId).to.be.equal(5);
         expect(network.isTestnet).to.be.true;
       });
     });
@@ -55,57 +55,68 @@ describe('Metamask', () => {
           rpcUrl: Cypress.env('DOCKER_RUN')
             ? 'http://foundry:8545'
             : 'http://127.0.0.1:8545',
-          chainId: '11155111',
-          symbol: 'SETH',
+          chainId: '5',
+          symbol: 'GETH',
           isTestnet: true,
         });
-        cy.get('#network').contains('11155111');
-        cy.get('#chainId').contains('0xaa36a7');
+        cy.get('#network').contains('5');
+        cy.get('#chainId').contains('0x5');
       } else {
         cy.addMetamaskNetwork({
-          networkName: 'Optimism Network',
-          rpcUrl: 'https://mainnet.optimism.io',
-          chainId: '10',
-          symbol: 'OETH',
-          blockExplorer: 'https://optimistic.etherscan.io',
+          networkName: 'Polygon Network',
+          rpcUrl: 'https://polygon-rpc.com',
+          chainId: '137',
+          symbol: 'MATIC',
+          blockExplorer: 'https://polygonscan.com',
           isTestnet: false,
         }).then(networkAdded => {
           expect(networkAdded).to.be.true;
         });
-        cy.get('#network').contains('10');
-        cy.get('#chainId').contains('0xa');
+        cy.get('#network').contains('0x89');
+        cy.get('#chainId').contains('0x89');
       }
     });
     it(`getNetwork should return valid network after adding a new network`, () => {
       cy.getNetwork().then(network => {
         if (Cypress.env('USE_ANVIL')) {
           expect(network.networkName).to.be.equal('anvil');
-          expect(network.networkId).to.be.equal(11155111);
+          expect(network.networkId).to.be.equal(5);
           expect(network.isTestnet).to.be.true;
         } else {
-          expect(network.networkName).to.be.equal('optimism network');
-          expect(network.networkId).to.be.equal(10);
+          expect(network.networkName).to.be.equal('polygon network');
+          expect(network.networkId).to.be.equal(137);
           expect(network.isTestnet).to.be.false;
         }
       });
     });
     it(`changeMetamaskNetwork should change network using pre-defined network`, () => {
-      cy.changeMetamaskNetwork('mainnet').then(networkChanged => {
+      cy.changeMetamaskNetwork('goerli').then(networkChanged => {
         expect(networkChanged).to.be.true;
       });
-      cy.get('#network').contains('0x1');
-      cy.get('#chainId').contains('0x1');
+      cy.get('#network').contains('5');
+      cy.get('#chainId').contains('0x5');
     });
     it(`getNetwork should return valid network after changing a network`, () => {
       cy.getNetwork().then(network => {
-        expect(network.networkName).to.be.equal('mainnet');
-        expect(network.networkId).to.be.equal(1);
-        expect(network.isTestnet).to.be.false;
+        expect(network.networkName).to.be.equal('goerli');
+        expect(network.networkId).to.be.equal(5);
+        expect(network.isTestnet).to.be.true;
       });
     });
-    it(`changeMetamaskNetwork should discard changing network if it is current one`, () => {
-      cy.changeMetamaskNetwork('mainnet').then(networkChanged => {
-        expect(networkChanged).to.be.false;
+    it(`rejectPermisionToApproveAll should reject permission to approve all collectibles upon warning`, () => {
+      cy.get('#deployCollectiblesButton').click();
+      cy.confirmMetamaskTransaction();
+      cy.get('#mintButton').click();
+      cy.confirmMetamaskTransaction();
+      cy.get('#setApprovalForAllButton').click();
+      cy.rejectPermisionToApproveAll().then(rejected => {
+        expect(rejected).to.be.true;
+      });
+    });
+    it(`confirmPermisionToApproveAll should confirm permission to approve all collectibles`, () => {
+      cy.get('#setApprovalForAllButton').click();
+      cy.confirmPermisionToApproveAll().then(confirmed => {
+        expect(confirmed).to.be.true;
       });
     });
     it(`changeMetamaskNetwork should change network using custom network name`, () => {
@@ -113,16 +124,16 @@ describe('Metamask', () => {
         cy.changeMetamaskNetwork('anvil').then(networkChanged => {
           expect(networkChanged).to.be.true;
         });
-        cy.get('#network').contains('0xaa36a7');
-        cy.get('#chainId').contains('0xaa36a7');
+        cy.get('#network').contains('5');
+        cy.get('#chainId').contains('0x5');
       } else {
-        cy.changeMetamaskNetwork('optimism network').then(networkChanged => {
+        cy.changeMetamaskNetwork('polygon network').then(networkChanged => {
           expect(networkChanged).to.be.true;
         });
-        cy.get('#network').contains('0xa');
-        cy.get('#chainId').contains('0xa');
-        cy.changeMetamaskNetwork('sepolia');
+        cy.get('#network').contains('0x89');
+        cy.get('#chainId').contains('0x89');
       }
+      cy.changeMetamaskNetwork('goerli');
     });
     it(`importMetamaskAccount should import new account using private key`, () => {
       cy.importMetamaskAccount(
@@ -371,11 +382,11 @@ describe('Metamask', () => {
       });
     });
     it(`importMetamaskToken should import token to metamask`, () => {
-      const USDCContractAddressOnSepolia =
-        '0xda9d4f9b69ac6C22e444eD9aF0CfC043b7a7f53f';
-      cy.importMetamaskToken(USDCContractAddressOnSepolia).then(tokenData => {
+      const USDCContractAddressOnGoerli =
+        '0x2f3a40a3db8a7e3d09b0adfefbce4f6f81927557';
+      cy.importMetamaskToken(USDCContractAddressOnGoerli).then(tokenData => {
         expect(tokenData.tokenContractAddress).to.be.equal(
-          USDCContractAddressOnSepolia,
+          USDCContractAddressOnGoerli,
         );
         expect(tokenData.tokenSymbol).to.be.equal('USDC');
         expect(tokenData.tokenDecimals).to.be.equal('6');
@@ -383,17 +394,17 @@ describe('Metamask', () => {
       });
     });
     it(`importMetamaskToken should import token to metamask using advanced token settings`, () => {
-      const tDAIContractAddressOnSepolia =
-        '0x53844F9577C2334e541Aec7Df7174ECe5dF1fCf0';
+      const USDTContractAddressOnGoerli =
+        '0x509ee0d083ddf8ac028f2a56731412edd63223b9';
       cy.importMetamaskToken({
-        address: tDAIContractAddressOnSepolia,
-        symbol: 'IADt',
+        address: USDTContractAddressOnGoerli,
+        symbol: 'TDSU',
       }).then(tokenData => {
         expect(tokenData.tokenContractAddress).to.be.equal(
-          tDAIContractAddressOnSepolia,
+          USDTContractAddressOnGoerli,
         );
-        expect(tokenData.tokenSymbol).to.be.equal('IADt');
-        expect(tokenData.tokenDecimals).to.be.equal('18');
+        expect(tokenData.tokenSymbol).to.be.equal('TDSU');
+        expect(tokenData.tokenDecimals).to.be.equal('6');
         expect(tokenData.imported).to.be.true;
       });
     });
