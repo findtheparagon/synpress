@@ -257,6 +257,14 @@ module.exports = (on, config) => {
     fetchMetamaskWalletAddress: async () => {
       return metamask.walletAddress();
     },
+    confirmPermisionToApproveAll: async () => {
+      const confirmed = await metamask.confirmPermisionToApproveAll();
+      return confirmed;
+    },
+    rejectPermisionToApproveAll: async () => {
+      const confirmed = await metamask.rejectPermisionToApproveAll();
+      return confirmed;
+    },
     setupMetamask: async ({
       secretWordsOrPrivateKey,
       network,
