@@ -780,20 +780,16 @@ const metamask = {
     return true;
   },
   async confirmPermisionToApproveAll() {
-    command.log('FIRST')
     const notificationPage = await playwright.switchToMetamaskNotification();
-    command.log('SECOND')
     await playwright.waitAndClick(
       notificationPageElements.allowToSpendButton,
       notificationPage,
     );
-    command.log('THIRD')
     await playwright.waitAndClick(
       notificationPageElements.approveWarningToSpendButton,
       notificationPage,
       { waitForEvent: 'close' },
     );
-    command.log('FOURTH')
     return true;
   },
   async rejectPermisionToApproveAll() {
